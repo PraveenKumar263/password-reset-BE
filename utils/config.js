@@ -7,6 +7,7 @@ const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS) || 10;
 const EMAIL_ID = process.env.EMAIL_ID;
 const EMAIL_PWD = process.env.EMAIL_PWD;
 const RESET_URL = process.env.RESET_URL;
+const SMTP_EMAIL_HOST = process.env.SMTP_EMAIL_HOST || 'gmail';
 
 module.exports = {
     MONGODB_URI,
@@ -15,5 +16,6 @@ module.exports = {
     SALT_ROUNDS,
     EMAIL_ID,
     EMAIL_PWD,
-    RESET_URL
+    RESET_URL,
+    SMTP_EMAIL_HOST
 };
