@@ -6,7 +6,7 @@ const JWT_TOKEN = process.env.JWT_TOKEN;
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS) || 10;
 const EMAIL_ID = process.env.EMAIL_ID;
 const EMAIL_PWD = process.env.EMAIL_PWD;
-const RESET_URL = process.env.RESET_URL;
+const FRONTEND_URL = process.env.FRONTEND_URL;
 const SMTP_EMAIL_HOST = process.env.SMTP_EMAIL_HOST || 'gmail';
 
 module.exports = {
@@ -16,6 +16,6 @@ module.exports = {
     SALT_ROUNDS,
     EMAIL_ID,
     EMAIL_PWD,
-    RESET_URL,
+    FRONTEND_URL,
     SMTP_EMAIL_HOST
 };

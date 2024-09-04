@@ -1,28 +1,28 @@
 // Imports
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
-const { SALT_ROUNDS, EMAIL_ID, RESET_URL } = require('../utils/config');
+const { SALT_ROUNDS, EMAIL_ID, FRONTEND_URL } = require('../utils/config');
 const transporter = require('../utils/emailSender');
 const randomstring = require('randomstring');
 
 const userController = {
     registerUser: async (req, res) => {
         try {
-            const { username, password } = req.body;
+            const { firstName, lastName, email, password } = req.body;
 
             // Check if user exists
-            const user = await User.findOne({ username: username });
+            const user = await User.findOne({ email });
             if (user) {
                 return res.status(400).json({ message: 'User already exists' });
             }
-            
+
             // Hash password
             const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
             // Save user to db
-            const newUser = new User({ username, password: hashedPassword });
+            const newUser = new User({ firstName, lastName, email, password: hashedPassword });
             await newUser.save();
-
+            
             return res.status(201).json({ message: 'User created' });
         } catch (error) {
             res.status(500).json({ message: error });
@@ -30,10 +30,10 @@ const userController = {
     },
     loginUser: async (req, res) => {
         try {
-            const { username, password } = req.body;
+            const { email, password } = req.body;
 
             // Check if user exists
-            const user = await User.findOne({ username: username });
+            const user = await User.findOne({ email });
             if (!user) {
                 return res.status(400).json({ message: 'User not found' });
             }
@@ -51,10 +51,10 @@ const userController = {
     },
     forgotPassword: async (req, res) => {
         try {
-            const { username } = req.body;
+            const { email } = req.body;
 
             // Check if user exists
-            const user = await User.findOne({ username: username });
+            const user = await User.findOne({ email });
             if (!user) {
                 return res.status(400).json({ message: 'User not found' });
             }
@@ -67,20 +67,20 @@ const userController = {
 
             // Ensure reset link is valid for only 1 hour
             const expiryTimeStamp = Date.now() + 60 * 60 * 1000;
-
+            
             // Store random string and expiry timestamp in the db
             const updateResult = await User.updateOne(
-                { username: username },
+                { email },
                 { $set: { resetToken: randomString, resetTokenExpiry: expiryTimeStamp } }
             );
 
             // Reset link
-            const resetLink = `${RESET_URL}/${randomString}/${expiryTimeStamp}`;
+            const resetLink = `${FRONTEND_URL}/resetPassword/?token=${randomString}&expires=${expiryTimeStamp}`;
 
             // Mail options
             const mailOptions = {
                 from: EMAIL_ID,
-                to: user.username,
+                to: user.email,
                 subject: 'Reset Password',
                 text: `Please use the following link to reset your password: ${resetLink}`
             };
@@ -88,7 +88,6 @@ const userController = {
             // Send email
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
-
                     return res.status(500).json({ message: 'Error sending email' });
                 }
 
@@ -103,14 +102,14 @@ const userController = {
         try {
             // Extract token and newPassword from request
             const { token } = req.params;
-            const { password: newPassword } = req.body;
-            
+            const { newPassword } = req.body;
+
             // Verify token and expiry
             const user = await User.findOne({ 
                 resetToken: token, 
                 resetTokenExpiry: { $gt: Date.now() } 
             });
-    
+
             if (!user) {
                 return res.status(400).json({ message: 'Reset link has expired or is invalid' });
             }
@@ -119,14 +118,14 @@ const userController = {
             const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
 
             // Update the user password in the database
-            await User.updateOne(
+            const updateResult = await User.updateOne(
                 { resetToken: token },
                 { $set: { password: hashedPassword, resetToken: null, resetTokenExpiry: null } }
             );
-    
+
             return res.json({ message: 'Password reset successfully' });
         } catch (error) {
-            res.status(500).json({ message: 'Internal server error' });
+            res.status(500).json({ message: 'Password reset failed' });
         }
     }
     
