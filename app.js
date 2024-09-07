@@ -5,11 +5,22 @@ const app = express();
 const cors = require('cors');
 const { FRONTEND_URL } = require('./utils/config');
 
-// use the cors middleware
-app.use(cors({
-    origin: FRONTEND_URL,
+const whiteList = [FRONTEND_URL, 'http://localhost:5173/'];
+
+// CORS config
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (whiteList.indexOf(origin) !== -1 || !origin) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true
-}));
+};
+
+// use the cors middleware
+app.use(cors(corsOptions));
 
 // Middleware to parse request as json
 app.use(express.json());
