@@ -75,7 +75,7 @@ const userController = {
             );
 
             // Reset link
-            const resetLink = `${FRONTEND_URL}/api/v1/resetPassword/?token=${randomString}&expires=${expiryTimeStamp}`;
+            const resetLink = `${FRONTEND_URL}/resetPassword/?token=${randomString}&expires=${expiryTimeStamp}`;
 
             // Mail options
             const mailOptions = {
