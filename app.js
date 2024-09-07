@@ -5,7 +5,7 @@ const app = express();
 const cors = require('cors');
 const { FRONTEND_URL } = require('./utils/config');
 
-const whiteList = [FRONTEND_URL, 'http://localhost:5173/'];
+const whiteList = [FRONTEND_URL, 'http://localhost:5173'];
 
 // CORS config
 const corsOptions = {
